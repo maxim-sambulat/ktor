@@ -40,16 +40,21 @@ internal class TLSClientSession(
     }
 
     private suspend fun appDataInputLoop(pipe: ByteWriteChannel) {
-        input.consumeEach { record ->
-            val packet = record.packet
-            val length = packet.remaining
-            when (record.type) {
-                TLSRecordType.ApplicationData -> {
-                    pipe.writePacket(record.packet)
-                    pipe.flush()
+        try {
+            input.consumeEach { record ->
+                val packet = record.packet
+                val length = packet.remaining
+                when (record.type) {
+                    TLSRecordType.ApplicationData -> {
+                        pipe.writePacket(record.packet)
+                        pipe.flush()
+                    }
+                    else -> throw TLSException("Unexpected record ${record.type} ($length bytes)")
                 }
-                else -> throw TLSException("Unexpected record ${record.type} ($length bytes)")
             }
+        } catch (cause: Throwable) {
+        } finally {
+            pipe.close()
         }
     }
 

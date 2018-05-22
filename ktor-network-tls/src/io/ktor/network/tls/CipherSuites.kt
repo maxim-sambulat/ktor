@@ -16,7 +16,7 @@ data class CipherSuite(
     val jdkCipherName: String,
     val keyStrength: Int,
     val fixedIvLength: Int,
-    val ivLength: Int,
+    val ivLength: Int, // SecurityParameters.record_iv_length + SecurityParameters.fixed_iv_length rfc5246
     val cipherTagSizeInBytes: Int,
     val macName: String,
     val macStrength: Int,
@@ -27,7 +27,6 @@ data class CipherSuite(
     val macStrengthInBytes = macStrength / 8
 }
 
-
 internal val TLS_RSA_WITH_AES_128_GCM_SHA256 = CipherSuite(
     0x009c, "TLS_RSA_WITH_AES_128_GCM_SHA256", "AES128-GCM-SHA256",
     SecretExchangeType.RSA, "AES/GCM/NoPadding",
@@ -36,6 +35,8 @@ internal val TLS_RSA_WITH_AES_128_GCM_SHA256 = CipherSuite(
     HashAlgorithm.SHA256, SignatureAlgorithm.RSA
 )
 
+// https://tools.ietf.org/html/rfc5288#section-3
+// https://www.ietf.org/rfc/rfc5289.txt
 internal val ECDHE_ECDSA_AES256_SHA384 = CipherSuite(
     0xc02c.toShort(), "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "ECDHE-ECDSA-AES256-GCM-SHA384",
     SecretExchangeType.ECDHE, "AES/GCM/NoPadding",

@@ -14,8 +14,8 @@ private const val MAX_TLS_FRAME_SIZE = 0x4800
 internal suspend fun ByteReadChannel.readTLSRecord(): TLSRecord {
     val type = TLSRecordType.byCode(readByte().toInt() and 0xff)
     val version = readTLSVersion()
-    val length = readShort().toInt() and 0xffff
 
+    val length = readShort().toInt() and 0xffff
     if (length > MAX_TLS_FRAME_SIZE) throw TLSException("Illegal TLS frame size: $length")
 
     val packet = readPacket(length)

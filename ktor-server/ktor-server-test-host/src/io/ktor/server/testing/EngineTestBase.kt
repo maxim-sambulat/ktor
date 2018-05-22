@@ -4,7 +4,7 @@ import io.ktor.application.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.*
-import io.ktor.client.engine.apache.*
+import io.ktor.client.engine.cio.*
 import io.ktor.client.engine.jetty.*
 import io.ktor.client.request.*
 import io.ktor.client.response.*
@@ -173,9 +173,9 @@ abstract class EngineTestBase<TEngine : ApplicationEngine, TConfiguration : Appl
             }
         }
 
-        starting.invokeOnCompletion { t ->
-            if (t != null) {
-                failures.add(t)
+        starting.invokeOnCompletion { cause ->
+            if (cause != null) {
+                failures.add(cause)
                 waitForPorts.cancel()
             }
         }
@@ -216,8 +216,8 @@ abstract class EngineTestBase<TEngine : ApplicationEngine, TConfiguration : Appl
         block: suspend HttpResponse.(Int) -> Unit
     ) = runBlocking {
         withTimeout(timeout.seconds, TimeUnit.SECONDS) {
-            HttpClient(Apache.config {
-                sslContext = Companion.sslContext
+            HttpClient(CIO.config {
+                https.trustManager = trustManager
             }).use { client ->
                 client.call(url, builder).response.use { response ->
                     block(response, port)
@@ -245,15 +245,17 @@ abstract class EngineTestBase<TEngine : ApplicationEngine, TConfiguration : Appl
         val keyStoreFile = File("build/temp.jks")
         lateinit var keyStore: KeyStore
         lateinit var sslContext: SSLContext
+        lateinit var trustManager: X509TrustManager
 
         @BeforeClass
         @JvmStatic
         fun setupAll() {
-            keyStore = generateCertificate(keyStoreFile)
+            keyStore = generateCertificate(keyStoreFile, algorithm = "SHA256withECDSA", keySizeInBits = 256)
             val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
             tmf.init(keyStore)
             sslContext = SSLContext.getInstance("TLS")
             sslContext.init(null, tmf.trustManagers, null)
+            trustManager = tmf.trustManagers.first { it is X509TrustManager } as X509TrustManager
         }
 
         private suspend fun CoroutineScope.waitForPort(port: Int) {

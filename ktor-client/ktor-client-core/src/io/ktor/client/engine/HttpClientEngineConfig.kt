@@ -16,7 +16,7 @@ open class HttpClientEngineConfig {
     /**
      * Enable http pipelining
      */
-    var pipelining: Boolean = true
+    var pipelining: Boolean = false
 
     /**
      * The [CoroutineDispatcher] that will be used for the client requests.

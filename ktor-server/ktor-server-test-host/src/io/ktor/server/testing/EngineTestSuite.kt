@@ -57,15 +57,7 @@ abstract class EngineTestSuite<TEngine : ApplicationEngine, TConfiguration : App
             val parsedContentType = ContentType.parse(contentType!!) // It should parse
             assertEquals(ContentType.Text.Plain.withCharset(Charsets.UTF_8), parsedContentType)
 
-            if (version == HttpProtocolVersion.HTTP_2_0) {
-                assertEquals(mapOf(
-                        "content-length" to listOf("4")), fields.build().toMap())
-            } else {
-                assertEquals(mapOf(
-                        "Connection" to listOf("keep-alive"),
-                        "Content-Length" to listOf("4")), fields.build().toMap())
-            }
-
+            assertEquals("4", headers[HttpHeaders.ContentLength])
             assertEquals("test", readText())
         }
     }

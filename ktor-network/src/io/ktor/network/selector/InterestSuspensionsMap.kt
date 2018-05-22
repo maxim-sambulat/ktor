@@ -27,7 +27,7 @@ class InterestSuspensionsMap {
             throw IllegalStateException("Handler for ${interest.name} is already registered")
         }
 
-        continuation.invokeOnCompletion { if (continuation.isCancelled) dropHandler(interest, continuation) }
+        continuation.invokeOnCancellation { if (continuation.isCancelled) dropHandler(interest, continuation) }
     }
 
     inline fun invokeIfPresent(interest: SelectInterest, block: CancellableContinuation<Unit>.() -> Unit): Boolean {

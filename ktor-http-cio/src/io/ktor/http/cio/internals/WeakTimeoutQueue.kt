@@ -80,7 +80,7 @@ class WeakTimeoutQueue(private val timeoutMillis: Long,
             c.isCompleted -> suspended
             result is CompletedExceptionally -> {
                 handle.dispose()
-                throw result.exception
+                throw result.cause
             }
             else -> {
                 handle.dispose()
